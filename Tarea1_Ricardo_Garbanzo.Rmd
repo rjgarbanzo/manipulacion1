@@ -45,29 +45,47 @@ Al eliminar las columnas que solamente tienen valores NA nos aseguramos en remov
 
 #### - Con un grafico muestre la evolucion del consumo de energia renovable para los paises Canada, Paraguay, Peru y China. Debe mostrar tanto el grafico como la tabla de datos con la que se realizo el grafico.
 
-#### - Con un grafico muestre los 10 paises con mayor superfcie bosocosa promedio para los anos analizados. Debe mostrar tanto el grafico como la tabla de datos con la que se realizo el grafico.
 
-```{r}
+
+```{r Grafico A}
 
 library(tidyr)
 library(dplyr)
-datos <- read.csv("bosques_energia.csv", header = T, sep = ",")
-
+library(ggplot2)
+library(scales)
 longer <- pivot_longer(
   datos, 
   cols = -c(Pais,Codigo.Pais,Indicador),
-  names_to = "Año",
-  values_to = "puntos",
+  names_to = "Year",
+  values_to = "Porcentaje",
   values_drop_na = T
 )
-longer
+
+consumo <- filter(
+  longer,
+  longer$Indicador == "Consumo de energía renovable (% del consumo total de energía final)"
+)
+
+
+grafico_A <- consumo %>% filter(Pais %in% c("Canada","Paraguay", "Peru", "China"))
+
+grafico_A$Year <- gsub("[a-zA-Z ]", "", grafico_A$Year)
+grafico_A$Year <- as.factor(grafico_A$Year)
+grafico_A
 
 
 
+ggplot(grafico_A, mapping = aes(x=Porcentaje, y=Year, color = Pais))+
+  geom_point()+
+  labs(title = "Consumo de energía renovable")
 
 ```
 
 
+#### - Con un grafico muestre los 10 paises con mayor superfcie bosocosa promedio para los anos analizados. Debe mostrar tanto el grafico como la tabla de datos con la que se realizo el grafico.
+```{r}
+
+```
 
 
 
