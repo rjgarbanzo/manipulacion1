@@ -1,0 +1,73 @@
+---
+title: "Tarea1_Ricardo_Garbanzo"
+author: "Ricardo Garbanzo"
+date: "3/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### 1. El archivo bosques energia.csv el cual contiene el resultado de dos estudios, uno en el que se mide la supercie boscosa en proporcion al terreno total de cada pais y el otro corresponde al consumo de energia renovable en proporcion al consumo de energia total. Estos estudios se hicieron en varios paises y en varios anos distintos. Con estos datos realize lo siguiente: 
+
+### a) (10 pts) Convierta los datos a datos tidy.
+
+
+```{r Ejercicio 1-A}
+library(tidyr)
+datos <- read.csv("bosques_energia.csv", header = T, sep = ",")
+#datos <- datos[, colSums(is.na(datos)) != nrow(datos)]
+
+years <- colnames(datos)[4:63]
+
+
+wider <- pivot_wider(
+  datos,
+  names_from = Indicador,
+  values_from = all_of(years) 
+)
+
+
+```
+
+
+### b) (6 pts) Elimine las variables innecesarias y explique el motivo.
+```{r Ejercicio 1-B}
+wider <- wider[, colSums(is.na(wider)) != nrow(wider)]
+```
+Al eliminar las columnas que solamente tienen valores NA nos aseguramos en remover solamente los años que no tienen registros
+
+
+
+
+### c) (24 pts) Con la ayuda del paquete dplyr, realice lo siguiente:
+
+#### - Con un grafico muestre la evolucion del consumo de energia renovable para los paises Canada, Paraguay, Peru y China. Debe mostrar tanto el grafico como la tabla de datos con la que se realizo el grafico.
+
+#### - Con un grafico muestre los 10 paises con mayor superfcie bosocosa promedio para los anos analizados. Debe mostrar tanto el grafico como la tabla de datos con la que se realizo el grafico.
+
+```{r}
+
+library(tidyr)
+library(dplyr)
+datos <- read.csv("bosques_energia.csv", header = T, sep = ",")
+
+longer <- pivot_longer(
+  datos, 
+  cols = -c(Pais,Codigo.Pais,Indicador),
+  names_to = "Año",
+  values_to = "puntos",
+  values_drop_na = T
+)
+longer
+
+
+
+
+```
+
+
+
+
+
