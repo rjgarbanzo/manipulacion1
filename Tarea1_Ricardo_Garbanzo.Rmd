@@ -196,7 +196,75 @@ suma_P
 
 ### c) (10 pts) Ejecute una Agrupacion Jerarquica con 3 clusters y muestre el dendrograma formado.
 
-### d) (10 pts) Calcule los centros de cada cluster y de una interpretacion usando el graco de tipo radar.
+```{r}
+library("cluster")
+library("factoextra")
+library("FactoMineR")
+
+row.names(suma_P) <- suma_P$pais
+suma_P[1] <- NULL
+
+matriz.distacias <- dist(suma_P)
+modelo <- hclust(matriz.distacias, method = "complete")
+plot(modelo)
+rect.hclust(modelo, k = 3, border = "red")
+```
+
+### d) (10 pts) Calcule los centros de cada cluster y de una interpretacion usando el grafico de tipo radar.
+
+```{r}
+library("cluster")
+library("factoextra")
+library("FactoMineR")
+library(fmsb)
+# Función para encontrar el centroide de cada cluster
+centroide <- function(num.cluster, datos, clusters) {
+  ind <- (clusters == num.cluster)
+  return(colMeans(datos[ind,]))
+}
+
+grupos <- cutree(modelo, k = 3)
+
+centro.cluster1 <- centroide(1, suma_P, grupos)
+centro.cluster1
+centro.cluster2 <- centroide(2, suma_P, grupos)
+centro.cluster2
+centro.cluster3 <- centroide(3, suma_P, grupos)
+centro.cluster3
+
+
+centros <- rbind(centro.cluster1,
+                 centro.cluster2,
+                 centro.cluster3)
+
+centros <- as.data.frame(centros)
+maximos <- apply(centros, 2, max)
+minimos <- apply(centros, 2, min)
+centros <- rbind(minimos, centros)
+centros <- rbind(maximos, centros)
+str(centros)
+
+color <- c("red","green","blue")
+radarchart(as.data.frame(centros),
+           maxmin=TRUE, axistype=4,
+           axislabcol="slategray4",
+           centerzero=FALSE, seg=8,
+           cglcol="gray67",
+           pcol=color,plty=1,
+           plwd=5,
+           title="Comparación de clústeres")
+
+legenda <-legend(1.5,1,
+                 legend=c("Cluster 1",
+                          "Cluster 2",
+                          "Cluster 3"),
+                 seg.len=-1.4, title="Clústeres",
+                 pch=21,bty="n", lwd=3,
+                 y.intersp=1, horiz=FALSE,
+                 col=color)
+
+```
+
 
 ### e) (24 pts) Construya una variable con el porcentaje de estudiantes que repiteron el año y otra con el gasto publico bruto si se repartiera en partes iguales a cada estudiante. Luego elimine las variables que se utilizaron para crear las 2 variables anteriores. Por ultimo, repita los 2 ejercicios anteriores con estos nuevos datos.
 

@@ -148,3 +148,73 @@ suma_P <- rename(
   "% no escolarizados" = "Porcentaje de niÃ±os no escolarizados",
   "% desercion" = "Porcentaje de desercion"
 )
+
+
+############################################
+
+library("cluster")
+library("factoextra")
+library("FactoMineR")
+
+row.names(suma_P) <- suma_P$pais
+suma_P[1] <- NULL
+
+suma_P[is.na(suma_P)] <- 0
+
+matriz.distacias <- dist(suma_P)
+modelo <- hclust(matriz.distacias, method = "complete")
+plot(modelo)
+rect.hclust(modelo, k = 3, border = "red")
+
+
+
+################################################
+
+
+library(fmsb)
+# Función para encontrar el centroide de cada cluster
+centroide <- function(num.cluster, datos, clusters) {
+  ind <- (clusters == num.cluster)
+  return(colMeans(datos[ind,]))
+}
+
+grupos <- cutree(modelo, k = 3)
+grupos
+
+centro.cluster1 <- centroide(1, suma_P, grupos)
+centro.cluster1
+centro.cluster2 <- centroide(2, suma_P, grupos)
+centro.cluster2
+centro.cluster3 <- centroide(3, suma_P, grupos)
+centro.cluster3
+
+
+centros <- rbind(centro.cluster1,
+                 centro.cluster2,
+                 centro.cluster3)
+
+centros <- as.data.frame(centros)
+maximos <- apply(centros, 2, max)
+minimos <- apply(centros, 2, min)
+centros <- rbind(minimos, centros)
+centros <- rbind(maximos, centros)
+str(centros)
+
+color <- c("red","green","blue")
+radarchart(as.data.frame(centros),
+           maxmin=TRUE, axistype=4,
+           axislabcol="slategray4",
+           centerzero=FALSE, seg=8,
+           cglcol="gray67",
+           pcol=color,plty=1,
+           plwd=5,
+           title="Comparación de clústeres")
+
+legenda <-legend(1.5,1,
+                 legend=c("Cluster 1",
+                          "Cluster 2",
+                          "Cluster 3"),
+                 seg.len=-1.4, title="Clústeres",
+                 pch=21,bty="n", lwd=3,
+                 y.intersp=1, horiz=FALSE,
+                 col=color)
