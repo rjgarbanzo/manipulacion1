@@ -93,12 +93,12 @@ grafico_B_top_10 <- grafico_B %>%
 grafico_B_top_10
 
 ggplot(data = grafico_B_top_10,
-       mapping = aes(x = Pais,
+       mapping = aes(x = fct_reorder(Pais,mean_all),
                      y = mean_all)) +
   geom_col(fill = "#07689f") +
   scale_y_continuous() +
   theme_linedraw() +
-  cord_flip
+  coord_flip()
 
 
 

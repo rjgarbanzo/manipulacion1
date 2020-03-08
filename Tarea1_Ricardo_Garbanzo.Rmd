@@ -84,7 +84,55 @@ ggplot(grafico_A, mapping = aes(x=Porcentaje, y=Year, color = Pais))+
 
 #### - Con un grafico muestre los 10 paises con mayor superfcie bosocosa promedio para los anos analizados. Debe mostrar tanto el grafico como la tabla de datos con la que se realizo el grafico.
 ```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(scales)
+library(forcats)
 
+longer <- pivot_longer(
+  datos, 
+  cols = -c(Pais,Codigo.Pais,Indicador),
+  names_to = "Year",
+  values_to = "Porcentaje",
+  values_drop_na = T
+)
+
+
+superficie <- filter(
+  longer,
+  longer$Indicador == "Consumo de energía renovable (% del consumo total de energía final)"
+)
+
+superficie$Year <- gsub("[a-zA-Z ]", "", superficie$Year)
+superficie$Year <- as.factor(superficie$Year)
+str(superficie)
+
+tabla_b <- pivot_wider(
+  superficie, 
+  id_cols = Pais, # No toma en cuenta la variable pais
+  names_from = Year, 
+  values_from = Porcentaje
+)
+
+grafico_B <- tabla_b %>% mutate(mean_all = rowMeans(tabla_b[-1]))
+
+grafico_B_top_10 <- grafico_B %>% 
+  filter(rank(desc(mean_all))<=10)
+
+grafico_B_top_10
+
+ggplot(data = grafico_B_top_10,
+       mapping = aes(x = fct_reorder(Pais,mean_all),
+                     y = mean_all)) +
+  geom_col(fill = "#07689f") +
+  scale_y_continuous() +
+  theme_linedraw() +
+  coord_flip()+
+  labs(title = "Paises con mayor superficie boscosa",
+       x = "Top 10 Paises",
+       y = "Promedio de porcentaje")
+  
 ```
 
 
