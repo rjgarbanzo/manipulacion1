@@ -21,11 +21,10 @@ datos <- read.csv("bosques_energia.csv", header = T, sep = ",")
 
 years <- colnames(datos)[4:63]
 
-
 wider <- pivot_wider(
   datos,
   names_from = Indicador,
-  values_from = all_of(years) 
+  values_from = years 
 )
 
 
@@ -137,3 +136,72 @@ ggplot(data = grafico_B_top_10,
 
 
 
+
+
+#### Ejercicio 2. El archivo DatosEducacion.csv contiene informacion de las escueles primarias de varios paises durante los años 2013 a 2019. Las variables estan por filas, los valores de dichas variables estan en forma columna por año. Nota: No olvide revisar el archivo con un bloc de notas. Cargue la tabla de datos y luego realice lo siguiente:
+```{r Carga de datos}
+datos <- read.csv("DatosEducacion_V2.csv", header = T, sep = ",")
+```
+
+
+### a) (5 pts) Convierta el dataset a uno tidy. Elimine las variables innecesarias y los valores con NA.
+```{r}
+library(tidyr)
+
+datos <- read.csv("DatosEducacion_V2.csv", header = T, sep = ",")
+
+wider<- pivot_wider(
+  datos,
+  names_from = fecha, 
+  values_from = valor,
+  values_fill = list(valor = 0)
+)
+```
+
+
+### b) (5 pts) Agrupe el dataset por pais y promedie los resultados, no incluya la variable fecha. Ademas, cambie los nombres de las variables a unos mas `cortos'.
+
+```{r Ejercicio 2-B}
+library(tidyr)
+library(dplyr)
+
+suma <- wider %>% mutate(mean_all = rowMeans(wider[-c(1,2,3)]))
+suma <- suma[-c(2,4:10)] 
+#sumaPais <- suma %>% group_by(indicador)
+
+suma_P <- pivot_wider(
+  suma,
+  names_from = indicador, 
+  values_from = mean_all
+)
+
+#str(suma_P)
+
+
+suma_P <- rename(
+  suma_P, 
+  "Repitentes" = "Cantidad de Estudiantes que repitieron", 
+  "Duracion en primaria" = "Duracion de la educacion primaria", 
+  "Alfabetizacion mayores a 15" = "Porcentaje de alfabetizacion de adultos para la poblacion mayor de 15 aÃ±os",
+  "% PIB en educacion primaria" = "Gasto publico en educacion primaria como porcentaje del PIB",
+  "Gasto educacion en millones USD" = "Gasto publico bruto en educacion primaria en millones de dolares",
+  "% matricula" = "Porcentaje de matricula",
+  "% no escolarizados" = "Porcentaje de niÃ±os no escolarizados",
+  "% desercion" = "Porcentaje de desercion"
+)
+suma_P
+
+```
+
+
+### c) (10 pts) Ejecute una Agrupacion Jerarquica con 3 clusters y muestre el dendrograma formado.
+
+### d) (10 pts) Calcule los centros de cada cluster y de una interpretacion usando el graco de tipo radar.
+
+### e) (24 pts) Construya una variable con el porcentaje de estudiantes que repiteron el año y otra con el gasto publico bruto si se repartiera en partes iguales a cada estudiante. Luego elimine las variables que se utilizaron para crear las 2 variables anteriores. Por ultimo, repita los 2 ejercicios anteriores con estos nuevos datos.
+
+### f) (6 pts) Con base a los resultados obtenidos, responda a las siguientes preguntas:
+
+#### - De los 2 resultados obtenidos anteriormente, Cual le hace mas sentido, segun los paises agrupados y sus caractersticas?
+
+#### - A que se debe que sean tan diferentes los 2 resultados obtenidos?

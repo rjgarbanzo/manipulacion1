@@ -103,6 +103,48 @@ ggplot(data = grafico_B_top_10,
 
 
 
+###########################################################################
+library(tidyr)
+
+datos <- read.csv("DatosEducacion_V2.csv", header = T, sep = ",")
+
+str(datos)
+
+wider<- pivot_wider(
+  datos,
+  names_from = fecha, 
+  values_from = valor,
+  values_fill = list(valor = 0)
+)
+
+###########################################################################
+library(tidyr)
+library(dplyr)
 
 
-  
+
+
+suma <- wider %>% mutate(mean_all = rowMeans(wider[-c(1,2,3)]))
+suma <- suma[-c(2,4:10)] 
+#sumaPais <- suma %>% group_by(indicador)
+
+suma_P <- pivot_wider(
+  suma,
+  names_from = indicador, 
+  values_from = mean_all
+)
+
+#str(suma_P)
+
+
+suma_P <- rename(
+  suma_P, 
+  "Repitentes" = "Cantidad de Estudiantes que repitieron", 
+  "Duracion en primaria" = "Duracion de la educacion primaria", 
+  "Alfabetizacion mayores a 15" = "Porcentaje de alfabetizacion de adultos para la poblacion mayor de 15 aÃ±os",
+  "% PIB en educacion primaria" = "Gasto publico en educacion primaria como porcentaje del PIB",
+  "Gasto educacion en millones USD" = "Gasto publico bruto en educacion primaria en millones de dolares",
+  "% matricula" = "Porcentaje de matricula",
+  "% no escolarizados" = "Porcentaje de niÃ±os no escolarizados",
+  "% desercion" = "Porcentaje de desercion"
+)
