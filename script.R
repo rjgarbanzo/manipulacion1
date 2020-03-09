@@ -103,6 +103,19 @@ ggplot(data = grafico_B_top_10,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 ###########################################################################
 library(tidyr)
 
@@ -186,6 +199,132 @@ centro.cluster1
 centro.cluster2 <- centroide(2, suma_P, grupos)
 centro.cluster2
 centro.cluster3 <- centroide(3, suma_P, grupos)
+centro.cluster3
+
+
+centros <- rbind(centro.cluster1,
+                 centro.cluster2,
+                 centro.cluster3)
+
+centros <- as.data.frame(centros)
+maximos <- apply(centros, 2, max)
+minimos <- apply(centros, 2, min)
+centros <- rbind(minimos, centros)
+centros <- rbind(maximos, centros)
+str(centros)
+
+color <- c("red","green","blue")
+radarchart(as.data.frame(centros),
+           maxmin=TRUE, axistype=4,
+           axislabcol="slategray4",
+           centerzero=FALSE, seg=8,
+           cglcol="gray67",
+           pcol=color,plty=1,
+           plwd=5,
+           title="Comparación de clústeres")
+
+legenda <-legend(1.5,1,
+                 legend=c("Cluster 1",
+                          "Cluster 2",
+                          "Cluster 3"),
+                 seg.len=-1.4, title="Clústeres",
+                 pch=21,bty="n", lwd=3,
+                 y.intersp=1, horiz=FALSE,
+                 col=color)
+
+
+
+
+
+
+
+
+
+################            DE NUEVO       #######################
+
+library("tidyr")
+library("dplyr")
+library("cluster")
+library("factoextra")
+library("FactoMineR")
+library("fmsb")
+
+datos <- read.csv("DatosEducacion_V2.csv", header = T, sep = ",")
+
+str(datos)
+
+wider<- pivot_wider(
+  datos,
+  names_from = fecha, 
+  values_from = valor,
+  values_fill = list(valor = 0)
+)
+
+
+suma <- wider %>% mutate(mean_all = rowMeans(wider[-c(1,2,3)]))
+suma <- suma[-c(2,4:10)] 
+
+
+suma_P <- pivot_wider(
+  suma,
+  names_from = indicador, 
+  values_from = mean_all
+)
+
+#suma_P[is.na(suma_P)] <- 0
+
+
+#str(suma_P)
+
+suma_P <- rename(
+  suma_P, 
+  "Repitentes" = "Cantidad de Estudiantes que repitieron", 
+  "Duracion en primaria" = "Duracion de la educacion primaria", 
+  "% Alfabetizacion mayores a 15" = "Porcentaje de alfabetizacion de adultos para la poblacion mayor de 15 aÃ±os",
+  "% PIB en educacion primaria" = "Gasto publico en educacion primaria como porcentaje del PIB",
+  "Gasto educacion en millones USD" = "Gasto publico bruto en educacion primaria en millones de dolares",
+  "% matricula" = "Porcentaje de matricula",
+  "% no escolarizados" = "Porcentaje de niÃ±os no escolarizados",
+  "% desercion" = "Porcentaje de desercion"
+)
+
+
+tabla_P <- suma_P %>% 
+  mutate("% de repitentes"  = suma_P$Repitentes/suma_P$`Poblacion en edad escolar`) %>%
+  mutate("Gasto por estudiante en USD"  = 
+           (suma_P$`Gasto educacion en millones USD`)*1000000 / suma_P$`Poblacion en edad escolar`) 
+
+tabla_P <- tabla_P[-c(2,8,10)]
+  
+
+tabla_P[is.na(tabla_P)] <- 0
+
+row.names(tabla_P) <- tabla_P$pais
+tabla_P[1] <- NULL
+
+#################### MODELO DE NUEVO  ############################
+matriz.distacias <- dist(tabla_P)
+modelo <- hclust(matriz.distacias, method = "complete")
+plot(modelo)
+rect.hclust(modelo, k = 3, border = "red")
+
+
+
+
+# Función para encontrar el centroide de cada cluster
+centroide <- function(num.cluster, datos, clusters) {
+  ind <- (clusters == num.cluster)
+  return(colMeans(datos[ind,]))
+}
+
+grupos <- cutree(modelo, k = 3)
+grupos
+
+centro.cluster1 <- centroide(1, tabla_P, grupos)
+centro.cluster1
+centro.cluster2 <- centroide(2, tabla_P, grupos)
+centro.cluster2
+centro.cluster3 <- centroide(3, tabla_P, grupos)
 centro.cluster3
 
 
